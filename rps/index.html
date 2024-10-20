@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: rgb(31, 31, 31);
+        }
+        p {
+            color: white;
+        }
+        .rpst {
+            font-size: 30px;
+        }
+        .rps {
+            font-size: 70px;
+            padding: 10px;
+            margin-left: 5px;
+            border-radius: 100%;
+            border-width: 5px;
+            border: solid;
+            border-color: white;
+            background-color: rgb(31, 31, 31);
+        }
+    </style>
+</head>
+<body>
+    <p class="rpst">ROCK PAPER SCISSORS</p>
+    <button class="rps" onclick="playgame('✊')">✊</button>
+    <button class="rps" onclick="playgame('✋')">✋</button>
+    <button class="rps" onclick="playgame('✌')">✌</button>
+
+    <p class="js-result resultcss"></p>
+    <p class="js-moves"></p>
+    <p class="js-score"></p>
+
+    <button onclick="resetScore()">Reset Score</button>
+    <button onclick="autoplay()">Auto Play</button>
+
+    <script>
+        let score = JSON.parse(localStorage.getItem('score')) || { wins: 0, losses: 0, ties: 0 };
+        document.querySelector('.js-score').innerHTML = `Wins: ${score.wins}, Losses: ${score.losses}, Ties: ${score.ties}`;
+
+        let isautoplaying = false;
+        let intervalID;
+
+        function autoplay() {
+            if (!isautoplaying) {
+                intervalID = setInterval(() => {
+                    const computerMove = pickcomputermove();
+                    playgame(computerMove);
+                }, 1000);
+                isautoplaying = true;
+            } else {
+                clearInterval(intervalID);
+                isautoplaying = false;
+            }
+        }
+
+        function resetScore() {
+            score.wins = 0;
+            score.losses = 0;
+            score.ties = 0;
+            localStorage.removeItem('score');
+            document.querySelector('.js-score').innerHTML = `Wins: ${score.wins}, Losses: ${score.losses}, Ties: ${score.ties}`;
+        }
+
+        function playgame(playermove) {
+            const computermove = pickcomputermove();
+            let result = getResult(playermove, computermove);
+
+            if (result === 'You Win') {
+                score.wins++;
+            } else if (result === 'You Lose') {
+                score.losses++;
+            } else if (result === 'Tie') {
+                score.ties++;
+            }
+
+            localStorage.setItem('score', JSON.stringify(score));
+            document.querySelector('.js-result').innerHTML = result;
+            document.querySelector('.js-score').innerHTML = `Wins: ${score.wins}, Losses: ${score.losses}, Ties: ${score.ties}`;
+            document.querySelector('.js-moves').innerHTML = `You: ${playermove}, Computer: ${computermove}`;
+        }
+
+        function pickcomputermove() {
+            const moves = ['✊', '✋', '✌'];
+            return moves[Math.floor(Math.random() * 3)];
+        }
+
+        function getResult(playermove, computermove) {
+            if (playermove === computermove) {
+                return 'Tie';
+            } else if (
+                (playermove === '✊' && computermove === '✌') ||
+                (playermove === '✋' && computermove === '✊') ||
+                (playermove === '✌' && computermove === '✋')
+            ) {
+                return 'You Win';
+            } else {
+                return 'You Lose';
+            }
+        }
+    </script>
+</body>
+</html>
